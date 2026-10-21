@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Code Quest 3D</title>
+  <meta name="description" content="Formation ludique pour comprendre l'application 3D Reader : JavaScript, C++, Python, serveurs, terminaux et GitHub.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧊</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <button type="button" id="menu-btn" class="icon-btn menu-btn" aria-label="Menu">☰</button>
+    <a href="#/home" class="brand"><span class="brand-logo" aria-hidden="true">🧊</span><span id="brand-name">Code Quest 3D</span></a>
+    <div class="top-right">
+      <div id="xp" class="xp"></div>
+      <div id="streak" class="streak"></div>
+      <button type="button" id="lang-btn" class="icon-btn lang-btn">EN</button>
+      <button type="button" id="theme-btn" class="icon-btn" aria-label="Theme">🌓</button>
+    </div>
+  </header>
+  <div class="layout">
+    <nav id="nav" class="sidebar" aria-label="Navigation"></nav>
+    <main id="view" tabindex="-1"><p class="muted">…</p></main>
+  </div>
+  <footer id="footer" class="footer"></footer>
+  <div id="term-pop" class="term-pop" hidden role="dialog"></div>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <noscript><p style="padding:2rem">Cette formation a besoin de JavaScript. / This course needs JavaScript.</p></noscript>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

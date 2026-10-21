@@ -1,5 +1,7 @@
 # Code Quest 3D — formation à 3D Reader
 
+🌐 **Site en ligne : https://alexdevanssay-cmyk.github.io/Code-Quest-3D/**
+
 Formation ludique, bilingue (français / anglais), pour comprendre de A à Z l'application
 [3D Reader](https://github.com/alexdevanssay-cmyk/3D-reader) quand on débute en code.
 
@@ -52,8 +54,12 @@ les modules JavaScript chargés depuis `file://`.)
 
 ## Publication sur GitHub Pages
 
-`.github/workflows/formation.yml` vérifie le contenu, lance les tests, puis publie le dossier sur
-GitHub Pages à chaque push sur `main`. Une seule fois : *Settings → Pages → Source : GitHub Actions*.
+Deux réglages possibles (*Settings → Pages → Source*) :
+
+- **Deploy from a branch** (`main`, `/ (root)`) : GitHub publie la racine du dépôt ; `index.html` à la
+  racine renvoie vers `formation/`. Rien d'autre à faire.
+- **GitHub Actions** : `.github/workflows/formation.yml` vérifie le contenu, lance les tests, puis ne
+  publie que le dossier `formation/` à chaque push sur `main` (ou *Actions → Formation → Run workflow*).
 
 ## Modifier ou ajouter du contenu
 

@@ -1,0 +1,17 @@
+rules_version = '2';
+
+// Code Quest 3D: each account can only read, write and delete its own
+// progress document, progress/{uid}. Everything else is refused.
+// To paste in Firebase console -> Firestore Database -> Rules -> Publish.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /progress/{uid} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['app', 'data', 'updatedAt'])
+        && request.resource.data.data is string
+        && request.resource.data.data.size() < 900000
+        && request.resource.data.updatedAt is number;
+    }
+  }
+}

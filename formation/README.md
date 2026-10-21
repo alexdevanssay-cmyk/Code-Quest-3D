@@ -93,7 +93,10 @@ Mise en route (une seule fois, environ 10 minutes) :
    *Compte* (👤 en haut à droite) propose de créer un compte.
 
 Fonctionnement : chaque réponse est d'abord enregistrée dans le navigateur, puis envoyée sur le
-compte deux secondes après la dernière modification (hors connexion : dès le retour du réseau). À la
+compte deux secondes après la dernière modification (hors connexion : dès le retour du réseau).
+Chaque envoi est fusionné avec la copie en ligne, et la page récupère la progression des autres
+appareils à l'ouverture et quand on revient sur son onglet : deux appareils ouverts en même temps
+ne s'effacent jamais l'un l'autre. À la
 connexion, si le navigateur et le compte ont tous deux de la progression, elles sont **fusionnées**
 (leçons, examens et badges des deux côtés, la réponse la plus récente de chaque question). Chacun
 peut supprimer son compte et ses données depuis la page *Compte*. Les comptes se gèrent dans la

@@ -120,3 +120,20 @@ test('nothing is sent after sign-out', async () => {
   await new Promise((r) => setTimeout(r, 30));
   assert.equal(JSON.parse(backend.docs.get('u1').data).q[ids[2]], undefined);
 });
+
+test('two devices open at once never erase each other’s answers', async () => {
+  const backend = fakeBackend();
+  const a = harness(backend);
+  const b = harness(backend);
+  await a.sync.start('u1');
+  await b.sync.start('u1');
+  record(course, a.state, ids[10], true);
+  await a.sync.push();
+  record(course, b.state, ids[11], true); // b has not seen a's answer
+  await b.sync.push();
+  const cloud = JSON.parse(backend.docs.get('u1').data);
+  assert.ok(cloud.q[ids[10]] && cloud.q[ids[11]], 'both answers kept online');
+  assert.ok(b.state.q[ids[10]], 'b got a’s answer');
+  await a.sync.refresh();
+  assert.ok(a.state.q[ids[11]], 'a gets b’s answer when it comes back to the page');
+});

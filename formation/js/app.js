@@ -901,7 +901,10 @@ $('#theme-btn').addEventListener('click', () => {
 $('#menu-btn').addEventListener('click', () => document.body.classList.toggle('nav-open'));
 window.addEventListener('hashchange', route);
 window.addEventListener('online', () => sync?.flush());
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') sync?.flush(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') sync?.flush();
+  else sync?.refresh();
+});
 window.addEventListener('storage', (e) => { if (e.key?.startsWith('codequest3d')) { state = load(); renderTopbar(); } });
 
 applyTheme();

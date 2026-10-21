@@ -78,6 +78,7 @@ export class Sync {
     this.timer = null;
     this.pending = false;
     this.lastSync = 0;
+    this.seen = null; // updatedAt of the account copy last read or written
   }
 
   /** Signs in `uid`: returns 'pulled' | 'pushed' | 'merged' | 'same'. */
@@ -94,15 +95,13 @@ export class Sync {
         if (!hasProgress(local)) {
           this.setState({ ...cloud, lang: local.lang, theme: local.theme });
           outcome = 'pulled';
-        } else if (JSON.stringify({ ...cloud, lang: 0, theme: 0 }) === JSON.stringify({ ...local, lang: 0, theme: 0 })) {
+        } else if (same(cloud, local)) {
           outcome = 'same';
         } else {
-          const merged = mergeStates(this.course, local, cloud);
-          merged.lang = local.lang;
-          merged.theme = local.theme;
-          this.setState(merged);
+          this.adopt(mergeStates(this.course, local, cloud));
           outcome = 'merged';
         }
+        this.seen = remote.updatedAt;
       }
       if (outcome !== 'same' && outcome !== 'pulled') await this.push();
       else {
@@ -117,9 +116,45 @@ export class Sync {
     }
   }
 
+  /** Takes a merged state, keeping this browser's language and theme. */
+  adopt(merged) {
+    const local = this.getState();
+    merged.lang = local.lang;
+    merged.theme = local.theme;
+    this.setState(merged);
+  }
+
+  /**
+   * Merges into this browser what another device sent since the last
+   * exchange. Returns true when the state changed.
+   */
+  async pull() {
+    if (!this.uid) return false;
+    const uid = this.uid;
+    const remote = await this.backend.getProgress(uid);
+    if (uid !== this.uid || !remote || remote.updatedAt === this.seen) return false;
+    this.seen = remote.updatedAt;
+    const local = this.getState();
+    const cloud = normalize(JSON.parse(remote.data));
+    if (same(cloud, local)) return false;
+    this.adopt(mergeStates(this.course, local, cloud));
+    return true;
+  }
+
+  /** Coming back to the page: fetch the other devices' progress. */
+  async refresh() {
+    if (!this.uid) return;
+    try {
+      if (await this.pull()) await this.push();
+    } catch (err) {
+      this.status(isOffline(err) ? 'offline' : 'error', { message: err.message });
+    }
+  }
+
   stop() {
     clearTimeout(this.timer);
     this.uid = null;
+    this.seen = null;
     this.pending = false;
   }
 
@@ -131,15 +166,22 @@ export class Sync {
     this.timer = setTimeout(() => this.push().catch(() => {}), this.delay);
   }
 
-  /** Sends the current state now. */
+  /**
+   * Sends the current state now, merged first with what another device may
+   * have sent meanwhile (so two open devices never erase each other's work).
+   */
   async push() {
     if (!this.uid) return;
     clearTimeout(this.timer);
     const uid = this.uid;
-    const state = this.getState();
     this.status('syncing');
     try {
-      await this.backend.setProgress(uid, JSON.stringify(state), state.updatedAt || Date.now());
+      await this.pull();
+      if (uid !== this.uid) return;
+      const state = this.getState();
+      const updatedAt = Math.max(state.updatedAt || 0, (this.seen || 0) + 1);
+      await this.backend.setProgress(uid, JSON.stringify(state), updatedAt);
+      this.seen = updatedAt;
       if (uid !== this.uid) return;
       this.pending = false;
       this.lastSync = Date.now();
@@ -157,6 +199,8 @@ export class Sync {
     return Promise.resolve();
   }
 }
+
+const same = (a, b) => JSON.stringify({ ...a, lang: 0, theme: 0, updatedAt: 0 }) === JSON.stringify({ ...b, lang: 0, theme: 0, updatedAt: 0 });
 
 function isOffline(err) {
   return (typeof navigator !== 'undefined' && navigator.onLine === false) || /network|offline|unavailable/i.test(`${err?.code} ${err?.message}`);
